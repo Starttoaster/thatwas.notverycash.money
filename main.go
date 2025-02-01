@@ -71,7 +71,7 @@ func commonHeadersMiddle(next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-func indexHandler(w http.ResponseWriter, r *http.Request) {
+func indexHandler(w http.ResponseWriter, _ *http.Request) {
 	content, err := static.ReadFile("index.html")
 	if err != nil {
 		http.Error(w, "Error loading page", http.StatusInternalServerError)
