@@ -113,7 +113,6 @@ func handleError(w http.ResponseWriter, r *http.Request, opts handleErrorOptions
 		logger.Info(opts.LogMsg, args...)
 	}
 	http.Error(w, opts.PublicMsg, opts.StatusCode)
-	return
 }
 
 func maxBytesMiddle(next http.HandlerFunc) http.HandlerFunc {
