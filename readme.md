@@ -2,4 +2,4 @@
 
 This is the source code for https://thatwas.notverycash.money/ofyou/
 
-![screenshot](cash.avif)
+![screenshot](cash-small.avif)
