@@ -59,6 +59,12 @@ func main() {
 				allowedMethodsMiddle(
 					logMiddle(
 						commonHeadersMiddle(robotsHandler))))))
+	http.HandleFunc("/healthz",
+		maxBytesMiddle(
+			pathCheckMiddle(
+				allowedMethodsMiddle(
+					logMiddle(
+						commonHeadersMiddle(healthHandler))))))
 
 	srv := &http.Server{
 		Addr:              fmt.Sprintf("%s:%d", "0.0.0.0", 8080),
@@ -138,7 +144,12 @@ func pathCheckMiddle(next http.HandlerFunc) http.HandlerFunc {
 
 func allowedMethodsMiddle(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
+		switch r.Method {
+		case http.MethodGet:
+			next.ServeHTTP(w, r)
+		case http.MethodHead:
+			next.ServeHTTP(w, r)
+		default:
 			handleError(w, r, handleErrorOptions{
 				LogMsg:     "blocked - method not allowed",
 				PublicMsg:  "Method Not Allowed",
@@ -146,7 +157,6 @@ func allowedMethodsMiddle(next http.HandlerFunc) http.HandlerFunc {
 			})
 			return
 		}
-		next.ServeHTTP(w, r)
 	}
 }
 
@@ -260,5 +270,25 @@ func smallImageHandler(w http.ResponseWriter, r *http.Request) {
 			StatusCode: http.StatusInternalServerError,
 		})
 		return
+	}
+}
+
+func healthHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(http.StatusOK)
+
+	// Don't send body on HEAD requests
+	// Go would strip the body out automatically, but no point in running this code for HEAD requests
+	if r.Method != http.MethodHead {
+		_, err := w.Write([]byte("OK"))
+		if err != nil {
+			handleError(w, r, handleErrorOptions{
+				Error:      err,
+				LogMsg:     "writing to response writer",
+				PublicMsg:  "Error loading page",
+				StatusCode: http.StatusInternalServerError,
+			})
+			return
+		}
 	}
 }
